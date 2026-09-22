@@ -5,17 +5,17 @@
  * output that the docs site can consume.
  *
  * Usage:
- *   node scripts/generate-release-notes.mjs wp/v0.1.1
- *   node scripts/generate-release-notes.mjs wp/v0.1.1 --json
+ *   node scripts/generate-release-notes.mjs v0.1.1
+ *   node scripts/generate-release-notes.mjs v0.1.1 --json
  *   node scripts/generate-release-notes.mjs --all --json
  */
 import { execFileSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Monorepo: el filtro de paths acota los notes a este paquete, no a katanakit-js.
+// El paquete vive en la raíz del repo, así que el log cubre todo el proyecto.
 const PACKAGE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
-const REPO = "senseikatana/katanakit";
+const REPO = "senseikatana/katanakit-wp";
 
 const SECTIONS = [
 	{ type: "feat", title: "🚀 Features" },
@@ -36,7 +36,7 @@ function allTags() {
 	return git("tag", "--sort=-v:refname")
 		.split("\n")
 		.map((tag) => tag.trim())
-		.filter((tag) => /^wp\/v\d+\.\d+\.\d+$/.test(tag));
+		.filter((tag) => /^v\d+\.\d+\.\d+$/.test(tag));
 }
 
 function previousTag(tag) {
@@ -83,7 +83,7 @@ function collect(tag) {
 			})),
 	})).filter((section) => section.items.length > 0);
 
-	return { tag, version: tag.replace(/^wp\/v/, ""), date, previous: prev, sections };
+	return { tag, version: tag.replace(/^v/, ""), date, previous: prev, sections };
 }
 
 function renderMarkdown(release) {

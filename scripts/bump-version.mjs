@@ -15,8 +15,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PACKAGE_JSON = join(ROOT, "package.json");
 const STYLE_CSS = join(ROOT, "style.css");
-// Tags propios de este paquete; la línea vX.Y.Z del monorepo es de katanakit-js.
-const TAG_PREFIX = "wp/v";
+const TAG_PREFIX = "v";
 
 const args = process.argv.slice(2);
 const kind = args[0];
@@ -43,9 +42,9 @@ if (kind === "--sync") {
 	const tag = execFileSync("git", ["tag", "--sort=-v:refname"], { cwd: ROOT, encoding: "utf8" })
 		.split("\n")
 		.map((line) => line.trim())
-		.find((line) => line.startsWith(TAG_PREFIX) && /^wp\/v\d+\.\d+\.\d+$/.test(line));
+		.find((line) => line.startsWith(TAG_PREFIX) && /^v\d+\.\d+\.\d+$/.test(line));
 	if (!tag) {
-		console.error("No wp/vX.Y.Z tags found");
+		console.error("No vX.Y.Z tags found");
 		process.exit(1);
 	}
 	writeVersion(tag.slice(TAG_PREFIX.length));
@@ -62,7 +61,7 @@ const version = bump(readVersion(), kind);
 writeVersion(version);
 
 const git = (...gitArgs) => execFileSync("git", gitArgs, { cwd: ROOT, stdio: "inherit" });
-// Pathspec explícito: no barre otros staging ni toca katanakit-js.
+// Pathspec explícito: limita el commit a los archivos de versión.
 git("commit", "-m", `chore(katanakit-wp): release v${version}`, "--", "package.json", "style.css");
 git("tag", `${TAG_PREFIX}${version}`);
 console.log(`Released ${TAG_PREFIX}${version}`);
